@@ -6,8 +6,6 @@ const app = express();
 const port = 6060;
 const currencyUrl = "https://www.tgju.org/currency";
 let cachedData = null;
-const cors = require('cors');
-
 app.use(cors({
     origin: '*',
     methods: ['GET', 'PUT', 'POST', 'DELETE'],
@@ -85,7 +83,7 @@ const _findPriceChange = function (elm, $) {
     };
 };
 
-app.get('/prices', (req, res) => {
+app.get('/api/prices', (req, res) => {
     if (cachedData) {
         res.json(cachedData);
     } else {
