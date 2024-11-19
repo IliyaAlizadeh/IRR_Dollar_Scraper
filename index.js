@@ -1,10 +1,18 @@
 const express = require('express');
 const cheerio = require('cheerio');
 const got = require('got');
+const cors = require('cors');
 const app = express();
-const port = 3000;
+const port = 6060;
 const currencyUrl = "https://www.tgju.org/currency";
 let cachedData = null;
+const cors = require('cors');
+
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'PUT', 'POST', 'DELETE'],
+    headers: ['Content-Type']
+}));
 const fetchAll = async function () {
     var response = await got(currencyUrl);
     var $ = cheerio.load(response.body);
@@ -21,14 +29,12 @@ const fetchAll = async function () {
         symbol: "€"
     };
     var oilBrent = $('#l-oil_brent > span > span.info-price').text();
-    const date = new Date();
-    const option = {
+    const dateUploading = new Date().toLocaleDateString("fa-IR", {
         day: "numeric",
         weekday: "long",
         month: "numeric",
         year: "numeric",
-    };
-    const dateUploading = date.toLocaleDateString("fa-IR", option);
+    });
     const timeUploading = new Date().toLocaleString("fa-IR", {
         timeZone: "Asia/Tehran",
         hour: "2-digit",
@@ -79,11 +85,11 @@ const _findPriceChange = function (elm, $) {
     };
 };
 
-app.get('/api/prices', (req, res) => {
+app.get('/prices', (req, res) => {
     if (cachedData) {
         res.json(cachedData);
     } else {
-        res.status(500).send('داده‌ای برای نمایش وجود ندارد');
+        res.status(500).send(' داده‌ای برای نمایش وجود ندارد');
     }
 });
 
@@ -93,7 +99,7 @@ setInterval(async () => {
     } catch (error) {
         console.error('خطا در به‌روزرسانی داده‌ها:', error);
     }
-}, 5000);
+}, 3600);
 
 app.listen(port, () => {
     console.log(`سرور در http://localhost:${port} در حال اجرا است`);
