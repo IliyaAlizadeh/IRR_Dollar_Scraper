@@ -1,52 +1,58 @@
 const express = require('express');
 const cheerio = require('cheerio');
 const got = require('got');
-
 const app = express();
-const port = 3000; // می‌توانید پورت دلخواه خود را انتخاب کنید
-
+const port = 3000;
 const currencyUrl = "https://www.tgju.org/currency";
-
+let cachedData = null;
 const fetchAll = async function () {
     var response = await got(currencyUrl);
     var $ = cheerio.load(response.body);
-
     var dollar = {
         price: $('#l-price_dollar_rl > span > span.info-price').text(),
         change: _findPriceChange($('#l-price_dollar_rl > span > span.info-change'), $),
         codes: "USD",
         symbol: "$"
     };
-
     var euro = {
         price: $('#l-price_eur > span > span.info-price').text(),
         change: _findPriceChange($('#l-price_eur > span > span.info-change'), $),
         codes: "EUR",
         symbol: "€"
     };
-
     var oilBrent = $('#l-oil_brent > span > span.info-price').text();
-    var createtime = (new Date().getTime());
+    const date = new Date();
+    const option = {
+        day: "numeric",
+        weekday: "long",
+        month: "numeric",
+        year: "numeric",
+    };
+    const dateUploading = date.toLocaleDateString("fa-IR", option);
+    const timeUploading = new Date().toLocaleString("fa-IR", {
+        timeZone: "Asia/Tehran",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    });
 
-    var output = {
-        "timestamp": createtime,
-        "currency": {
-            dollar,
-            euro,
-        },
+
+    cachedData = {
+        "date": dateUploading,
+        "time": timeUploading,
+        dollar,
+        euro,
         "oil": { oilBrent },
     };
-
-    return output;
 };
 
 const _findPriceChange = function (elm, $) {
     let firstLevelClass = elm.attr('class');
-    let firstchild = elm.children().get(0);
+    let firstChild = elm.children().get(0);
     let targetClassName = null;
 
-    if (firstchild && firstchild.tagName == 'span') {
-        targetClassName = $(firstchild).attr('class');
+    if (firstChild && firstChild.tagName == 'span') {
+        targetClassName = $(firstChild).attr('class');
     } else {
         let parent = elm.parents('li');
         targetClassName = parent.attr('class');
@@ -73,18 +79,22 @@ const _findPriceChange = function (elm, $) {
     };
 };
 
-// تعریف یک مسیر API
-app.get('/api/prices', async (req, res) => {
-    try {
-        const data = await fetchAll();
-        res.json(data);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('خطا در دریافت داده‌ها');
+app.get('/api/prices', (req, res) => {
+    if (cachedData) {
+        res.json(cachedData);
+    } else {
+        res.status(500).send('داده‌ای برای نمایش وجود ندارد');
     }
 });
 
-// راه‌اندازی سرور
+setInterval(async () => {
+    try {
+        await fetchAll();
+    } catch (error) {
+        console.error('خطا در به‌روزرسانی داده‌ها:', error);
+    }
+}, 5000);
+
 app.listen(port, () => {
     console.log(`سرور در http://localhost:${port} در حال اجرا است`);
 });
