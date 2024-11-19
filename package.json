@@ -1,0 +1,24 @@
+{
+  "name": "dollar-tomans-api",
+  "version": "1.0.1",
+  "description": "return last price of currency like dollar, pound, euro, bitcoin plus oil and gold price in rials(or tomans)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IliyaAlizadeh/IRR_Dollar_Scraper.git"
+  },
+  "author": "Iliya Alizadeh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IliyaAlizadeh/IRR_Dollar_Scraper/issues"
+  },
+  "homepage": "https://github.com/IliyaAlizadeh/IRR_Dollar_Scraper#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "express": "^4.21.1",
+    "got": "^11.8.3"
+  }
+}
